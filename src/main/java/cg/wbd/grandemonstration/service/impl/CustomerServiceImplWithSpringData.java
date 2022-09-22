@@ -3,10 +3,13 @@ package cg.wbd.grandemonstration.service.impl;
 import cg.wbd.grandemonstration.model.Customer;
 import cg.wbd.grandemonstration.repository.CustomerRepository;
 import cg.wbd.grandemonstration.service.CustomerService;
+import cg.wbd.grandemonstration.service.DuplicateEmailException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,8 +28,8 @@ public class CustomerServiceImplWithSpringData implements CustomerService {
     }
 
     @Override
-    public Page<Customer> findAll(Pageable pageInfo) throws Exception {
-        if (true) throw new Exception("Vai nin`");
+    public Page<Customer> findAll(Pageable pageInfo)  {
+//        if (true) throw new Exception("Vai nin`");
         return customerRepository.findAll(pageInfo);
     }
 
@@ -46,14 +49,19 @@ public class CustomerServiceImplWithSpringData implements CustomerService {
     public Optional<Customer> findOne(Long id) throws Exception {
         Optional<Customer> customerOptional = customerRepository.findById(id);
         if (!customerOptional.isPresent()) {
+            ModelAndView modelAndView = new ModelAndView("alo");
             throw new Exception("customer not found!");
         }
         return customerOptional;
     }
 
     @Override
-    public Customer save(Customer customer) {
-        return customerRepository.save(customer);
+    public Customer save(Customer customer) throws DuplicateEmailException {
+        try {
+            return customerRepository.save(customer);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateEmailException();
+        }
     }
 
     @Override

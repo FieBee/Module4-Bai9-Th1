@@ -3,6 +3,7 @@ package cg.wbd.grandemonstration.controller;
 import cg.wbd.grandemonstration.model.Customer;
 import cg.wbd.grandemonstration.model.Province;
 import cg.wbd.grandemonstration.service.CustomerService;
+import cg.wbd.grandemonstration.service.DuplicateEmailException;
 import cg.wbd.grandemonstration.service.ProvinceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -30,12 +31,17 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ModelAndView showList(Optional<String> s, Pageable pageInfo) throws Exception {
-        ModelAndView modelAndView = new ModelAndView("/customers/list");
-        Page<Customer> customers = s.isPresent() ? search(s, pageInfo) : getPage(pageInfo);
-        modelAndView.addObject("keyword", s.orElse(null));
-        modelAndView.addObject("customers", customers);
-        return modelAndView;
+    public ModelAndView showList(Optional<String> s, Pageable pageInfo){
+//        try {
+            ModelAndView modelAndView = new ModelAndView("/customers/list");
+            Page<Customer> customers = s.isPresent() ? search(s, pageInfo) : getPage(pageInfo);
+            modelAndView.addObject("keyword", s.orElse(null));
+            modelAndView.addObject("customers", customers);
+            return modelAndView;
+//        } catch (Exception e) {
+//            return new ModelAndView("/customers/alo");
+//        }
+
     }
 
     @GetMapping("/{id}")
@@ -51,12 +57,17 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ModelAndView updateCustomer(Customer customer) {
-        customerService.save(customer);
-        return new ModelAndView("redirect:/customers");
+    public ModelAndView updateCustomer(Customer customer) throws DuplicateEmailException{
+            customerService.save(customer);
+            return new ModelAndView("redirect:/customers");
+    }
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ModelAndView showInputNotAcceptable() {
+        return new ModelAndView("/customers/inputs-not-acceptable");
     }
 
-    private Page<Customer> getPage(Pageable pageInfo) throws Exception {
+
+    private Page<Customer> getPage(Pageable pageInfo) {
         return customerService.findAll(pageInfo);
     }
 

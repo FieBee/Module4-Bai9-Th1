@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface CustomerService {
     List<Customer> findAll();
 
-    Page<Customer> findAll(Pageable pageInfo) throws Exception;
+    Page<Customer> findAll(Pageable pageInfo);
 
     List<Customer> search(String keyword);
 
@@ -18,7 +18,7 @@ public interface CustomerService {
 
     Optional<Customer> findOne(Long id) throws Exception;
 
-    Customer save(Customer customer);
+    Customer save(Customer customer) throws DuplicateEmailException;
 
     List<Customer> save(List<Customer> customers);
 
